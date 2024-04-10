@@ -13,12 +13,28 @@ public let UIScreenPixel = 1.0 / UIScreenScale
 
 public extension UIScreen {
     
-    var width: CGFloat {
-        return bounds.width
+    static var width: CGFloat {
+        return UIScreen.main.bounds.width
     }
     
-    var height: CGFloat {
-        return bounds.height
+    static var height: CGFloat {
+        return UIScreen.main.bounds.height
+    }
+    
+    static var safeAreaTop: CGFloat {
+        UIWindow.keyWindow?.safeAreaInsetTop ?? 0
+    }
+    
+    static var safeAreaBottom: CGFloat {
+        UIWindow.keyWindow?.safeAreaInsetBottom ?? 0
+    }
+    
+    static var safeScreenHeight: CGFloat {
+        width - safeAreaTop - safeAreaBottom
+    }
+    
+    static var topInsetWithNavigationBar: CGFloat {
+        return safeAreaTop + 44
     }
     
 }
