@@ -114,7 +114,7 @@ public enum ChildViewControllerAnimation {
             self.startAnimation(for: viewController)
         }) { _ in
             UIView.animate(withDuration: 0.1, animations: {
-                viewController.view.backgroundColor = .clear
+                viewController.backgroundButton.alpha = 0
             }) { _ in
                 completion()
             }
@@ -128,7 +128,10 @@ public enum ChildViewControllerAnimation {
         case .drop:
             viewController.animationViews.forEach({$0.transform = CGAffineTransform(translationX: 0, y: -$0.frame.maxY)})
         case .cover:
-            viewController.animationViews.forEach({$0.transform = CGAffineTransform(translationX: 0, y: $0.superview!.frame.height - $0.frame.minY)})
+            viewController.animationViews.forEach({
+                $0.alpha = 0
+                $0.transform = CGAffineTransform(translationX: 0, y: $0.superview!.frame.height - $0.frame.minY)
+            })
         case .zoom:
             viewController.animationViews.forEach({$0.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)})
         default:
@@ -137,14 +140,10 @@ public enum ChildViewControllerAnimation {
     }
     
     private func endAnimation(for viewController: AnimatedChildViewController) {
-        switch self {
-        case .fade:
-            viewController.animationViews.forEach({$0.alpha = 1})
-        case .drop, .cover, .zoom:
-            viewController.animationViews.forEach({$0.transform = .identity})
-        default:
-            break
-        }
+        viewController.animationViews.forEach({
+            $0.alpha = 1
+            $0.transform = .identity
+        })
     }
 }
 
