@@ -34,4 +34,30 @@ public extension String {
         return formattedResult.joined(separator: " ")
     }
     
+    /// 除首位字符外，其余字符全用"*"替换
+    var maskedExceptFirstAndLast: String {
+        guard count > 2, let first = first, let last = last else { return self }
+        return String(first) + String(repeating: "*", count: self.count - 2) + String(last)
+    }
+    
+    /// 邮箱"@"前面部分
+    var maskedEmail: String {
+        guard let atIndex = firstIndex(of: "@") else { return self }
+        let username = String(prefix(upTo: atIndex))
+        let domain = String(suffix(from: index(after: atIndex)))
+        return "\(username.maskedExceptFirstAndLast)@\(domain)"
+    }
+    
+    /// 生成二维码
+    func generateQRCode(size: CGSize) -> UIImage? {
+        let data = self.data(using: String.Encoding.ascii)
+        guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
+        filter.setValue(data, forKey: "inputMessage")
+        guard let qrcodeImage = filter.outputImage else { return nil }
+        let scaleX = size.width / qrcodeImage.extent.size.width
+        let scaleY = size.height / qrcodeImage.extent.size.height
+        let transform = CGAffineTransform(scaleX: scaleX, y: scaleY)
+        let transformedImage = qrcodeImage.transformed(by: transform)
+        return UIImage(ciImage: transformedImage)
+    }
 }
