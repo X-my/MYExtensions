@@ -150,6 +150,7 @@ public enum ChildViewControllerAnimation {
 extension UIViewController {
     
     public func showChild(_ child: AnimatedChildViewController, completion: (() -> ())? = nil) {
+        view.endEditing(true)
         child.view.frame = view.bounds
         let backgroundButton = child.backgroundButton
         backgroundButton.frame = child.view.bounds
@@ -187,5 +188,15 @@ extension UIViewController {
             }
         }
         return screenEdgePanGestureRecognizer
+    }
+}
+
+public extension UIViewController {
+    func popOrDismiss(animated: Bool = true) {
+        if navigationController?.viewControllers.count ?? 0 > 1 {
+            navigationController?.popViewController(animated: animated)
+        } else {
+            dismiss(animated: animated, completion: nil)
+        }
     }
 }
