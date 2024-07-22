@@ -30,7 +30,7 @@ public extension UIScreen {
     }
     
     static var safeScreenHeight: CGFloat {
-        width - safeAreaTop - safeAreaBottom
+        height - safeAreaTop - safeAreaBottom
     }
     
     static var topInsetWithNavigationBar: CGFloat {
