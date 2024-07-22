@@ -15,5 +15,6 @@ Pod::Spec.new do |s|
   s.dependency 'RxSwift'
   s.dependency 'RxCocoa'
   s.dependency 'NSObject+Rx'
+  s.dependency 'RxGesture'
 end
  
