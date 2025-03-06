@@ -5,12 +5,11 @@
 //  Created by xmy on 2020/4/8.
 //
 
-import UIKit
-import RxCocoa
 import NSObject_Rx
+import RxCocoa
+import UIKit
 
 public protocol AnimatedChildViewController: UIViewController {
-    
     var animationViews: [UIView] { get }
     
     var backgroundViewAlpha: CGFloat { get }
@@ -21,12 +20,10 @@ public protocol AnimatedChildViewController: UIViewController {
     
     var dismissAnimation: ChildViewControllerAnimation { get }
     
-    func dismiss(completion: (() -> ())?)
-    
+    func didDismiss()
 }
 
 public extension AnimatedChildViewController {
-    
     var animationViews: [UIView] {
         return [view]
     }
@@ -47,11 +44,14 @@ public extension AnimatedChildViewController {
         return showAnimation
     }
     
+    func didDismiss() {}
+    
     func dismiss(completion: (() -> ())? = nil) {
         willMove(toParent: nil)
         dismissAnimation.doDismissAnimation(for: self) {
             self.view.removeFromSuperview()
             self.removeFromParent()
+            self.didDismiss()
             completion?()
         }
     }
@@ -72,7 +72,6 @@ public extension AnimatedChildViewController {
         }
         return button
     }
-
 }
 
 public enum ChildViewControllerAnimation {
@@ -87,7 +86,7 @@ public enum ChildViewControllerAnimation {
     /// zoom in/zoom out
     case zoom
     
-    fileprivate func doShowAnimation(for viewController: AnimatedChildViewController, completion:@escaping () -> ()) {
+    public func doShowAnimation(for viewController: AnimatedChildViewController, completion: @escaping () -> ()) {
         guard self != .none else {
             completion()
             return
@@ -105,7 +104,7 @@ public enum ChildViewControllerAnimation {
         }
     }
     
-    fileprivate func doDismissAnimation(for viewController: AnimatedChildViewController, completion:@escaping () -> ()) {
+    public func doDismissAnimation(for viewController: AnimatedChildViewController, completion: @escaping () -> ()) {
         guard self != .none else {
             completion()
             return
@@ -124,32 +123,31 @@ public enum ChildViewControllerAnimation {
     fileprivate func startAnimation(for viewController: AnimatedChildViewController) {
         switch self {
         case .fade:
-            viewController.animationViews.forEach({$0.alpha = 0})
+            viewController.animationViews.forEach { $0.alpha = 0 }
         case .drop:
-            viewController.animationViews.forEach({$0.transform = CGAffineTransform(translationX: 0, y: -$0.frame.maxY)})
+            viewController.animationViews.forEach { $0.transform = CGAffineTransform(translationX: 0, y: -$0.frame.maxY) }
         case .cover:
-            viewController.animationViews.forEach({
-                $0.alpha = 0
-                $0.transform = CGAffineTransform(translationX: 0, y: $0.superview!.frame.height - $0.frame.minY)
-            })
+            for animationView in viewController.animationViews {
+                animationView.alpha = 0
+                animationView.transform = CGAffineTransform(translationX: 0, y: animationView.superview!.frame.height - animationView.frame.minY)
+            }
         case .zoom:
-            viewController.animationViews.forEach({$0.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)})
+            viewController.animationViews.forEach { $0.transform = CGAffineTransform(scaleX: 0.01, y: 0.01) }
         default:
             break
         }
     }
     
     private func endAnimation(for viewController: AnimatedChildViewController) {
-        viewController.animationViews.forEach({
-            $0.alpha = 1
-            $0.transform = .identity
-        })
+        for animationView in viewController.animationViews {
+            animationView.alpha = 1
+            animationView.transform = .identity
+        }
     }
 }
 
-extension UIViewController {
-    
-    public func showChild(_ child: AnimatedChildViewController, completion: (() -> ())? = nil) {
+public extension UIViewController {
+    func showChild(_ child: AnimatedChildViewController, completion: (() -> ())? = nil) {
         view.endEditing(true)
         child.view.frame = view.bounds
         let backgroundButton = child.backgroundButton
@@ -164,21 +162,19 @@ extension UIViewController {
             completion?()
         }
     }
-    
 }
 
 extension UIViewController {
-    
     // MARK: - Interactive Pop Gesture Handling
     
     public func enableInteractivePopGestureRecognizer(for scrollView: UIScrollView) {
-        if let screenEdgePanGestureRecognizer = screenEdgePanGestureRecognizerForNavigationController()  {
+        if let screenEdgePanGestureRecognizer = screenEdgePanGestureRecognizerForNavigationController() {
             scrollView.panGestureRecognizer.require(toFail: screenEdgePanGestureRecognizer)
         }
     }
     
     func screenEdgePanGestureRecognizerForNavigationController() -> UIScreenEdgePanGestureRecognizer? {
-        guard let gestureRecognizers = navigationController?.view.gestureRecognizers  else {
+        guard let gestureRecognizers = navigationController?.view.gestureRecognizers else {
             return nil
         }
         var screenEdgePanGestureRecognizer: UIScreenEdgePanGestureRecognizer?
