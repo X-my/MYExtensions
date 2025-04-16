@@ -46,13 +46,18 @@ public extension AnimatedChildViewController {
     
     func didDismiss() {}
     
-    func dismiss(completion: (() -> ())? = nil) {
+    func dismiss(aniamtion: Bool = true, completion: (() -> ())? = nil) {
         willMove(toParent: nil)
-        dismissAnimation.doDismissAnimation(for: self) {
+        let operation = {
             self.view.removeFromSuperview()
             self.removeFromParent()
             self.didDismiss()
             completion?()
+        }
+        if aniamtion {
+            dismissAnimation.doDismissAnimation(for: self, completion: operation)
+        } else {
+            operation()
         }
     }
     
